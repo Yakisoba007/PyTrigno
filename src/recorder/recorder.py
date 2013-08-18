@@ -20,7 +20,6 @@ import numpy as np
 import socket
 import os
 from kinectRecorder import KinectRecorder
-import primesense.openni2
 
 class Recorder(QMainWindow):
     def __init__(self, parent=None):
