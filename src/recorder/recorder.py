@@ -19,8 +19,8 @@ import pyqtgraph as pg
 import numpy as np
 import socket
 import os
-#import openni as oni
-
+from kinectRecorder import KinectRecorder
+import primesense.openni2
 
 class Recorder(QMainWindow):
     def __init__(self, parent=None):
@@ -46,6 +46,8 @@ class Recorder(QMainWindow):
         self.runPinger.setSingleShot(True)
         self.runPinger.timeout.connect(self.stop)
         self.pinger.timeout.connect(self.ping)
+        self.kinectRecorder=None
+        self.newpath=None
         
     def clearDock(self):
         if self.showSessionMeta is not None:
@@ -62,6 +64,7 @@ class Recorder(QMainWindow):
             self.dockLayout.removeWidget(self.showRunMeta)
             self.showSessionMeta = None
             self.showRunMeta = None
+            self.kinectRecorder.killRecorder()
             
     def preparePlots(self):
         if self.ui.frame.layout() is None:
@@ -88,9 +91,9 @@ class Recorder(QMainWindow):
         self.clearDock()
         sessionDialog = SessionDialog(self)
         if sessionDialog.exec_():
-            newpath = sessionDialog.ui.leDir.text()+'\\'+sessionDialog.ui.leName.text()
-            if not os.path.isdir(newpath):
-                os.makedirs(newpath)
+            self.newpath = sessionDialog.ui.leDir.text()+'\\'+sessionDialog.ui.leName.text()
+            if not os.path.isdir(self.newpath):
+                os.makedirs(self.newpath)
             else:
                 print('reusing folder')
                 QMessageBox.information(self, 'Warning!', '''You\'re reusing the subject folder''',
@@ -101,7 +104,7 @@ class Recorder(QMainWindow):
             self.showSessionMeta = sessionView(self.session, self)
             self.showRunMeta = RunWidget()
             self.showRunMeta.ui.leCurrentRun.setText(str(len(self.session.runs)))
-            
+            self.kinectRecorder=KinectRecorder()
             self.dockLayout.addWidget(self.showSessionMeta)
             self.dockLayout.addWidget(self.showRunMeta)
             self.showRunMeta.show()
@@ -132,7 +135,7 @@ class Recorder(QMainWindow):
             
             name = self.showRunMeta.ui.leCurrentRun.text()
             self.session.addRun(name)
-                        
+            self.kinectRecorder.startRecording(self.newpath+'\\'+name+'.oni')            
             self.ui.elapsedTime.setRange(0,d)
 
 
@@ -152,6 +155,7 @@ class Recorder(QMainWindow):
         
         self.session.stopRun(self.server.buffer)
         self.server.buffer = None
+        self.kinectRecorder.stopRecording()
         
     def trigger(self):
         print("trigger")
