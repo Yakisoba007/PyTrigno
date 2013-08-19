@@ -15,5 +15,5 @@ class sessionView(QWidget):
         self.ui = Ui_Form()
         self.ui.setupUi(self)
         self.ui.showName.setText(session.name)
-        self.ui.showBemerkung.setHtml(session.remarks)
+        self.ui.showBemerkung.setPlainText(session.remarks)
         self.ui.showDir.setText(session.dir)

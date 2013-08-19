@@ -85,5 +85,6 @@
  </connections>
  <slots>
   <slot>toggleEternity()</slot>
+  <slot>openItem()</slot>
  </slots>
 </ui>

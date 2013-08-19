@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'sessionDialog.ui'
 #
-# Created: Tue Aug 13 12:39:06 2013
+# Created: Mon Aug 19 14:10:52 2013
 #      by: pyside-uic 0.2.14 running on PySide 1.1.2
 #
 # WARNING! All changes made in this file will be lost!

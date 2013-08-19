@@ -19,6 +19,7 @@ def commandPort():
     
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     sData= socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    sAcc= socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     
     s.bind(('', port))
     s.listen(1)
@@ -29,6 +30,9 @@ def commandPort():
     sData.listen(1)
     connData, _ = sData.accept()
     
+    sAcc.bind(('', portData+1))
+    sAcc.listen(1)
+    connAcc, _ = sAcc.accept()    
     while True:
         data = conn.recv(1024)
         if not data: break
@@ -36,14 +40,17 @@ def commandPort():
             serverStatus = True
             conn.sendall('accepted')
             thread.start_new_thread(sendData, (connData,))
+            thread.start_new_thread(sendData, (connAcc,))
         if serverStatus and data in ('QUIT\r\n\r\n'):
             serverStatus = False
             break
     s.close()
     sData.close()
+    sAcc.close()
 def sendData(conn):
     while serverStatus:
         package = ''
+        accpkg = ''
         data = np.random.rand(16)
         for i in range(data.shape[0]):
             package += pack('<'+'f', data[i])

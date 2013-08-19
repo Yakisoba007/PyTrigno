@@ -35,7 +35,7 @@ class DragWindow(QFrame):
     def __init__(self, parent=None):
         super(DragWindow, self).__init__(parent)
         self.setAcceptDrops(True)
-        self.setStyleSheet("QFrame {background-image: url(./arm.jpg);background-repeat: no-repeat;}")
+        self.setStyleSheet("QFrame {background-image: url(../plotter/arm.jpg);background-repeat: no-repeat;}")
         
         self.server = DelsysStation(buffered=True)
         
@@ -75,7 +75,7 @@ class DragWindow(QFrame):
     
     def updatePlots(self):
         for item in self.plots.itervalues():
-            data = self.server.buffer[:]
+            data = self.server.buffer[0][:]
             item.updatePlot(data)
         
     def contextMenuEvent(self, e):
@@ -152,9 +152,18 @@ class DragPlotWidget(QFrame):
 
 class DataWrapper(object):
     def __init__(self, data):
-        self.data = [None]*data[0].shape[0]*4
-        self.name = ['emg 01']*data[0].shape[0]*4
-        self.data[::4] = data[0]
+        l = data[0][0].shape
+        self.data = [None]*l[0]*4
+        self.name = []
+        for i in range(l[1]):
+            name = str(i+1).zfill(2)
+            for k in ('emg ', 'accX ', 'accY ', 'accZ '):
+                self.name.append(k + name)
+        
+        self.data[::4] = data[0][0].tolist()
+        for i in range(l[0]):
+            for k in range(1,4):
+                self.data[i*4+k] = data[0][1][i+k-1].tolist()
         self.triggers = data[1]
 
 class Plotter(QMainWindow):
@@ -190,15 +199,17 @@ class Plotter(QMainWindow):
                      self, self.tr("Open data"),
                      plattform.fixpath("D:\\Master\\emg\\electrodes\\prepare"), self.tr("Pickle Files (*.pk)"))
         if ok1:
-            for fileName in fileNames:
-                with open(fileName, 'rb') as ifile:
-                    tmp = pickle.load(ifile)
-                    if isinstance(tmp, pyHPF.pyHPF):
-                        self.datas.append(tmp)
-                    else:
-                        self.datas.append(DataWrapper(tmp))
-                    self.updateTree(fileName[-5:])
-                    
+            self.load(fileNames)
+    
+    def load(self, fileNames):
+        for fileName in fileNames:
+            with open(fileName, 'rb') as ifile:
+                tmp = pickle.load(ifile)
+                if isinstance(tmp, pyHPF.pyHPF):
+                    self.datas.append(tmp)
+                else:
+                    self.datas.append(DataWrapper(tmp))
+                self.updateTree(fileName[-5:])                    
     def updateTree(self, name):
         dataItem = QTreeWidgetItem(self.ui.dataView)
         dataItem.setText(0, name)
@@ -217,6 +228,8 @@ class Plotter(QMainWindow):
         
         for item in self.ui.dataView.selectedItems():
             c = int(item.text(0)[-1])-1
+            if c >= len(colors):
+                c = c % len(colors)
             self.axes.plot(item.emg, label=item.text(0), c=colors[c])
             for p in item.triggers:
                 self.axes.plot([p]*2, [np.min(item.emg), np.max(item.emg)], c='k')
