@@ -16,9 +16,9 @@ class SessionDialog(QDialog):
         
     def check(self):
         if len(self.ui.leName.text().strip()) < 1:
-            print "Name must be filled"
+            print("Name must be filled")
         elif not os.path.isdir(self.ui.leDir.text()):
-            print "need an existing dir"
+            print("need an existing dir")
         else:
             self.accept()
     

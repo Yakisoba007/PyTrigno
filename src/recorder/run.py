@@ -3,8 +3,11 @@ Created on 13.08.2013
 
 @author: Genji
 '''
-
-import cPickle as pickle
+try: 
+    import cPickle as pickle
+except ImportError:
+    import pickle as pickle
+    
 class Run(object):
     '''
     classdocs
@@ -22,6 +25,6 @@ class Run(object):
     
     def stop(self, data):
         self.data = data
-        print self.data.shape
+        print(self.data.shape)
         with open(self.filename, 'wb') as f:
             pickle.dump((self.data, self.triggers), f)

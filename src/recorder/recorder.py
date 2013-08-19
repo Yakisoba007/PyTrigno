@@ -18,6 +18,8 @@ import pyqtgraph as pg
 
 import numpy as np
 import socket
+import os
+#import openni as oni
 
 
 class Recorder(QMainWindow):
@@ -47,11 +49,11 @@ class Recorder(QMainWindow):
         
     def clearDock(self):
         if self.showSessionMeta is not None:
-            reply = QMessageBox.question(self, "QMessageBox.question()",
-                                         "Do you want to first save the current session?",
+            reply = QMessageBox.question(self, 'QMessageBox.question()',
+                                         'Do you want to first save the current session?',
                                          QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel)
             if reply == QMessageBox.Yes:
-                print "save"
+                print("save")
             elif reply == QMessageBox.Cancel:
                 return 
             
@@ -92,9 +94,16 @@ class Recorder(QMainWindow):
         self.clearDock()
         sessionDialog = SessionDialog(self)
         if sessionDialog.exec_():
+            newpath = sessionDialog.ui.leDir.text()+'\\'+sessionDialog.ui.leName.text()
+            if not os.path.isdir(newpath):
+                os.makedirs(newpath)
+            else:
+                print('reusing folder')
+                QMessageBox.information(self, 'Warning!', '''You\'re reusing the subject folder''',
+            QMessageBox.Ok)
             self.session = Session(sessionDialog.ui.leName.text(),
                                    sessionDialog.ui.teBemerkung.toHtml(),
-                                   sessionDialog.ui.leDir.text())
+                                   sessionDialog.ui.leDir.text()+'\\'+sessionDialog.ui.leName.text())
             self.showSessionMeta = sessionView(self.session, self)
             self.showRunMeta = RunWidget()
             self.showRunMeta.ui.leCurrentRun.setText(str(len(self.session.runs)))
@@ -113,7 +122,7 @@ class Recorder(QMainWindow):
             self.startTime = datetime.now()
             self.server.start()
         except:
-            print "something went wrong"
+            print("something went wrong")
             self.server.exitFlag = True
             raise socket.timeout("Could not connect to Delsys Station")
         else:
@@ -152,7 +161,7 @@ class Recorder(QMainWindow):
         self.server.buffer = None
         
     def trigger(self):
-        print "trigger"
+        print("trigger")
         trigger = self.server.buffer.shape[1]
         self.session.addTrigger(trigger)
         

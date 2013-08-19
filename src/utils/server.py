@@ -6,7 +6,10 @@ Created on 13.08.2013
 
 from PySide.QtCore import QObject
 import socket
-import thread
+try:
+    import thread
+except ImportError:
+    import _thread as thread
 from struct import unpack
 import numpy as np
 import sys
@@ -15,7 +18,7 @@ class DelsysStation(QObject):
     def __init__(self, buffered = False, parent = None):
         super(DelsysStation, self).__init__(parent)
         
-        self.host = '10.16.96.96'
+        self.host = '192.168.178.22' #'10.16.96.96'
         self.port = 50041
         self.sdkPort = 50040
         self.s = None
