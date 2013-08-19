@@ -9,6 +9,7 @@ import socket
 import thread
 from struct import unpack
 import numpy as np
+import sys
 
 class DelsysStation(QObject):
     def __init__(self, buffered = False, parent = None):
@@ -27,8 +28,9 @@ class DelsysStation(QObject):
         self.exitFlag = True
         
     def start(self):
-        self.s = socket.create_connection((self.host, self.port))
+        print "connect to " + str(self.host)
         self.sdk = socket.create_connection((self.host, self.sdkPort))
+        self.s = socket.create_connection((self.host, self.port))
         
         self.sdk.send('START\r\n\r\n')
         self.sdk.recv(1024)
@@ -36,7 +38,13 @@ class DelsysStation(QObject):
         
     def networking(self):
         while not self.exitFlag:
-            data = np.asarray(unpack('<'+'f'*16*27, self.s.recv(1728)))
+            data = self.s.recv(1728)
+            print len(data)
+            l = len(data)
+            while l < 1728:
+                data += self.s.recv(1728-l)
+                l = len(data)
+            data = np.asarray(unpack('<'+'f'*16*27, data))
             data = np.transpose(data.reshape((-1,16)))
             l = data.shape[1]
             

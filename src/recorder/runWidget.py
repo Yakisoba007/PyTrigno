@@ -14,3 +14,9 @@ class RunWidget(QWidget):
         self.ui = Ui_Form()
         self.ui.setupUi(self)
         self.session = None
+        
+    def toggleEternity(self, i):
+        if i == 0:
+            self.ui.timeEdit.setEnabled(True)
+        elif i== 2:
+            self.ui.timeEdit.setDisabled(True)

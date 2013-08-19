@@ -82,6 +82,12 @@ class Recorder(QMainWindow):
         
         self.plotWidget.show()
         
+    def setServer(self):
+        text, ok = QInputDialog.getText(self, "Set server",
+                'Enter server adress')
+        if ok:
+            self.server.host = text
+            
     def newSession(self):
         self.clearDock()
         sessionDialog = SessionDialog(self)
@@ -111,10 +117,15 @@ class Recorder(QMainWindow):
             self.server.exitFlag = True
             raise socket.timeout("Could not connect to Delsys Station")
         else:
-            duration = self.showRunMeta.ui.timeEdit.time()
-            d = duration.second() + duration.minute()*60
+            if self.showRunMeta.ui.cbEternity.checkState() == 0:
+                duration = self.showRunMeta.ui.timeEdit.time()
+                d = duration.second() + duration.minute()*60
+                
+                self.runPinger.start(d*1000)
+                self.ui.elapsedTime.setRange(0,d)
+            elif self.showRunMeta.ui.cbEternity.checkState() == 2:
+                self.ui.elapsedTime.setRange(0,0)
             
-            self.runPinger.start(d*1000)
             self.pinger.start()
             
             self.ui.tbStop.setEnabled(True)
@@ -123,16 +134,12 @@ class Recorder(QMainWindow):
             
             name = self.showRunMeta.ui.leCurrentRun.text()
             self.session.addRun(name)
-                        
-            self.ui.elapsedTime.setRange(0,d)
-
-
     
     def stop(self):
         self.ui.tbStop.setEnabled(False)
         self.ui.tbTrigger.setEnabled(False)
         self.ui.tbStart.setEnabled(True)
-        self.ui.elapsedTime.setValue(0)
+        self.ui.elapsedTime.reset()
         
         self.showRunMeta.ui.leCurrentRun.setText(str(len(self.session.runs)))
         self.server.exitFlag = True
