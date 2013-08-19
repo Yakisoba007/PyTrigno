@@ -25,6 +25,7 @@ class Run(object):
     
     def stop(self, data):
         self.data = data
-        print(self.data.shape)
+        print len(self.data)
+        print self.data[0].shape
         with open(self.filename, 'wb') as f:
             pickle.dump((self.data, self.triggers), f)

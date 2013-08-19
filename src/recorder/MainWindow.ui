@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>PyTrigno</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout_2">
@@ -142,6 +142,8 @@
     <property name="title">
      <string>File</string>
     </property>
+    <addaction name="actionOpen_Plotter"/>
+    <addaction name="separator"/>
     <addaction name="actionNew"/>
     <addaction name="actionSave"/>
     <addaction name="separator"/>
@@ -165,15 +167,32 @@
    <property name="text">
     <string>New</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+N</string>
+   </property>
   </action>
   <action name="actionSave">
    <property name="text">
     <string>Save</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+S</string>
+   </property>
   </action>
   <action name="actionServer">
    <property name="text">
     <string>Server</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+O</string>
+   </property>
+  </action>
+  <action name="actionOpen_Plotter">
+   <property name="text">
+    <string>Open Plotter</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+P</string>
    </property>
   </action>
  </widget>
@@ -243,11 +262,62 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>actionServer</sender>
+   <signal>activated()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>setServer()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>399</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionSave</sender>
+   <signal>activated()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>save()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>399</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionOpen_Plotter</sender>
+   <signal>activated()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>openPlotter()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>399</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>newSession()</slot>
   <slot>startRun()</slot>
   <slot>trigger()</slot>
   <slot>stop()</slot>
+  <slot>setServer()</slot>
+  <slot>save()</slot>
+  <slot>openPlotter()</slot>
  </slots>
 </ui>

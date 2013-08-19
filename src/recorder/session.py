@@ -20,7 +20,7 @@ class Session(object):
         self.remarks = remarks
         self.dir = outDir
         self.runs = []
-        self.dump(os.path.join(self.dir, "ReadMe.html"))
+        self.dump("ReadMe.txt")
         
     def addRun(self, name):
         self.runs.append(Run(os.path.join(self.dir, name)))
@@ -30,7 +30,8 @@ class Session(object):
         
     def addTrigger(self, time):
         self.runs[-1].triggers.append(time)
+        
     def dump(self, filename):
-        with open(filename, 'w') as f:
+        with open(os.path.join(self.dir,filename), 'w') as f:
             f.write(self.remarks)
             f.close()

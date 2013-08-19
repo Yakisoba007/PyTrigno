@@ -20,6 +20,7 @@ import numpy as np
 import socket
 import os
 from kinectRecorder import KinectRecorder
+from plotter.plotter import Plotter
 
 class Recorder(QMainWindow):
     def __init__(self, parent=None):
@@ -27,6 +28,7 @@ class Recorder(QMainWindow):
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
         
+        self.plotter = None
         self.session = None
         self.server = DelsysStation(parent=self)
         
@@ -47,6 +49,7 @@ class Recorder(QMainWindow):
         self.pinger.timeout.connect(self.ping)
         self.kinectRecorder=None
         self.newpath=None
+        self.notSavedState = False
         
     def clearDock(self):
         if self.showSessionMeta is not None:
@@ -54,13 +57,15 @@ class Recorder(QMainWindow):
                                          'Do you want to first save the current session?',
                                          QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel)
             if reply == QMessageBox.Yes:
-                print("save")
+                self.save()
             elif reply == QMessageBox.Cancel:
                 return 
             
             self.session = None
             self.dockLayout.removeWidget(self.showSessionMeta)
             self.dockLayout.removeWidget(self.showRunMeta)
+            self.showSessionMeta.deleteLater()
+            self.showRunMeta.deleteLater()
             self.showSessionMeta = None
             self.showRunMeta = None
             self.kinectRecorder.killRecorder()
@@ -86,24 +91,32 @@ class Recorder(QMainWindow):
         
         self.plotWidget.show()
         
+    def setServer(self):
+        text, ok = QInputDialog.getText(self, "Set server",
+                'Enter server adress')
+        if ok:
+            self.server.host = text
+            
     def newSession(self):
         self.clearDock()
         sessionDialog = SessionDialog(self)
         if sessionDialog.exec_():
-            self.newpath = sessionDialog.ui.leDir.text()+'\\'+sessionDialog.ui.leName.text()
-            if not os.path.isdir(self.newpath):
-                os.makedirs(self.newpath)
+            newpath = os.path.join(sessionDialog.ui.leDir.text(), sessionDialog.ui.leName.text()) 
+            if not os.path.isdir(newpath):
+                os.makedirs(newpath)
             else:
                 print('reusing folder')
                 QMessageBox.information(self, 'Warning!', '''You\'re reusing the subject folder''',
             QMessageBox.Ok)
             self.session = Session(sessionDialog.ui.leName.text(),
-                                   sessionDialog.ui.teBemerkung.toHtml(),
-                                   sessionDialog.ui.leDir.text()+'\\'+sessionDialog.ui.leName.text())
+                                   sessionDialog.ui.teBemerkung.toPlainText(),
+                                   newpath)
             self.showSessionMeta = sessionView(self.session, self)
-            self.showRunMeta = RunWidget()
+            self.showRunMeta = RunWidget(self)
             self.showRunMeta.ui.leCurrentRun.setText(str(len(self.session.runs)))
-            self.kinectRecorder=KinectRecorder()
+            self.kinectRecorder=KinectRecorder()            
+            self.showSessionMeta.ui.showBemerkung.textChanged.connect(self.pendingSave)
+            self.showRunMeta.ui.lwRuns.itemDoubleClicked.connect(self.openPlotter)
             self.dockLayout.addWidget(self.showSessionMeta)
             self.dockLayout.addWidget(self.showRunMeta)
             self.showRunMeta.show()
@@ -111,6 +124,16 @@ class Recorder(QMainWindow):
             self.preparePlots()
             self.ui.tbStart.setEnabled(True)
     
+    def pendingSave(self):
+        self.notSavedState = True
+        self.setWindowTitle("PyTrigno(*)")
+        
+    def save(self):
+        self.notSavedState = False
+        self.setWindowTitle("PyTrigno")
+        self.session.remarks = self.showSessionMeta.ui.showBemerkung.toPlainText()
+        self.session.dump("ReadMe.txt")
+        
     def startRun(self):
         #setup server
         self.server.exitFlag = False
@@ -122,10 +145,15 @@ class Recorder(QMainWindow):
             self.server.exitFlag = True
             raise socket.timeout("Could not connect to Delsys Station")
         else:
-            duration = self.showRunMeta.ui.timeEdit.time()
-            d = duration.second() + duration.minute()*60
+            if self.showRunMeta.ui.cbEternity.checkState() == 0:
+                duration = self.showRunMeta.ui.timeEdit.time()
+                d = duration.second() + duration.minute()*60
+                
+                self.runPinger.start(d*1000)
+                self.ui.elapsedTime.setRange(0,d)
+            elif self.showRunMeta.ui.cbEternity.checkState() == 2:
+                self.ui.elapsedTime.setRange(0,0)
             
-            self.runPinger.start(d*1000)
             self.pinger.start()
             
             self.ui.tbStop.setEnabled(True)
@@ -136,14 +164,15 @@ class Recorder(QMainWindow):
             self.session.addRun(name)
             self.kinectRecorder.startRecording(self.newpath+'\\'+name+'.oni')            
             self.ui.elapsedTime.setRange(0,d)
-
-
     
     def stop(self):
         self.ui.tbStop.setEnabled(False)
         self.ui.tbTrigger.setEnabled(False)
         self.ui.tbStart.setEnabled(True)
-        self.ui.elapsedTime.setValue(0)
+        self.ui.elapsedTime.reset()
+        
+        QListWidgetItem(self.showRunMeta.ui.leCurrentRun.text(),
+                        self.showRunMeta.ui.lwRuns)
         
         self.showRunMeta.ui.leCurrentRun.setText(str(len(self.session.runs)))
         self.server.exitFlag = True
@@ -155,6 +184,7 @@ class Recorder(QMainWindow):
         self.session.stopRun(self.server.buffer)
         self.server.buffer = None
         self.kinectRecorder.stopRecording()
+        self.server.flush()
         
     def trigger(self):
         print("trigger")
@@ -166,12 +196,36 @@ class Recorder(QMainWindow):
         self.ui.elapsedTime.setValue(elapsed)
         
         for p in range(len(self.plots)):
-            if self.server.buffer is None:
-                return
-            if self.server.buffer.shape[1] < 5000:
-                self.plots[p].plot(self.server.buffer[p], clear=True)
+            if self.server.buffer[0].shape[1] < 5000:
+                self.plots[p].plot(self.server.buffer[0][p], clear=True)
             else:
-                self.plots[p].plot(self.server.buffer[p,-5000:], clear=True)
+                self.plots[p].plot(self.server.buffer[0][p,-5000:], clear=True)
+    
+    def openPlotter(self, item=None):
+        if self.plotter is None:
+            self.plotter = Plotter()
+        if item is not None:
+            self.plotter.load([os.path.join(self.session.dir, item.text()) + ".pk"])
+        self.plotter.show()
+        
+    def closeEvent(self, event):
+        # do stuff
+        if self.notSavedState:
+            reply = QMessageBox.question(self, 'QMessageBox.question()',
+                                            'Do you want to first save the current session?',
+                                            QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel)
+        else:
+            reply = QMessageBox.No
+
+        if reply == QMessageBox.Yes:
+            self.save()
+        elif reply == QMessageBox.Cancel:
+            event.ignore()
+            return
+      
+        if not self.server.exitFlag:
+            self.stop()
+        event.accept()
         
 if __name__ == '__main__':
     app = QApplication(sys.argv)

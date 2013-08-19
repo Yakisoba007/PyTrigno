@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'MainWindow.ui'
 #
-# Created: Wed Aug 14 13:05:37 2013
+# Created: Mon Aug 19 16:27:10 2013
 #      by: pyside-uic 0.2.14 running on PySide 1.1.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -79,6 +79,10 @@ class Ui_MainWindow(object):
         self.actionSave.setObjectName("actionSave")
         self.actionServer = QtGui.QAction(MainWindow)
         self.actionServer.setObjectName("actionServer")
+        self.actionOpen_Plotter = QtGui.QAction(MainWindow)
+        self.actionOpen_Plotter.setObjectName("actionOpen_Plotter")
+        self.menuNew.addAction(self.actionOpen_Plotter)
+        self.menuNew.addSeparator()
         self.menuNew.addAction(self.actionNew)
         self.menuNew.addAction(self.actionSave)
         self.menuNew.addSeparator()
@@ -90,10 +94,13 @@ class Ui_MainWindow(object):
         QtCore.QObject.connect(self.tbStart, QtCore.SIGNAL("clicked()"), MainWindow.startRun)
         QtCore.QObject.connect(self.tbStop, QtCore.SIGNAL("clicked()"), MainWindow.stop)
         QtCore.QObject.connect(self.tbTrigger, QtCore.SIGNAL("clicked()"), MainWindow.trigger)
+        QtCore.QObject.connect(self.actionServer, QtCore.SIGNAL("activated()"), MainWindow.setServer)
+        QtCore.QObject.connect(self.actionSave, QtCore.SIGNAL("activated()"), MainWindow.save)
+        QtCore.QObject.connect(self.actionOpen_Plotter, QtCore.SIGNAL("activated()"), MainWindow.openPlotter)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):
-        MainWindow.setWindowTitle(QtGui.QApplication.translate("MainWindow", "MainWindow", None, QtGui.QApplication.UnicodeUTF8))
+        MainWindow.setWindowTitle(QtGui.QApplication.translate("MainWindow", "PyTrigno", None, QtGui.QApplication.UnicodeUTF8))
         self.tbStart.setText(QtGui.QApplication.translate("MainWindow", "start", None, QtGui.QApplication.UnicodeUTF8))
         self.tbStart.setShortcut(QtGui.QApplication.translate("MainWindow", "Ctrl+R", None, QtGui.QApplication.UnicodeUTF8))
         self.tbTrigger.setText(QtGui.QApplication.translate("MainWindow", "trigger", None, QtGui.QApplication.UnicodeUTF8))
@@ -103,6 +110,11 @@ class Ui_MainWindow(object):
         self.elapsedTime.setFormat(QtGui.QApplication.translate("MainWindow", "%v", None, QtGui.QApplication.UnicodeUTF8))
         self.menuNew.setTitle(QtGui.QApplication.translate("MainWindow", "File", None, QtGui.QApplication.UnicodeUTF8))
         self.actionNew.setText(QtGui.QApplication.translate("MainWindow", "New", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionNew.setShortcut(QtGui.QApplication.translate("MainWindow", "Ctrl+N", None, QtGui.QApplication.UnicodeUTF8))
         self.actionSave.setText(QtGui.QApplication.translate("MainWindow", "Save", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionSave.setShortcut(QtGui.QApplication.translate("MainWindow", "Ctrl+S", None, QtGui.QApplication.UnicodeUTF8))
         self.actionServer.setText(QtGui.QApplication.translate("MainWindow", "Server", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionServer.setShortcut(QtGui.QApplication.translate("MainWindow", "Ctrl+O", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionOpen_Plotter.setText(QtGui.QApplication.translate("MainWindow", "Open Plotter", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionOpen_Plotter.setShortcut(QtGui.QApplication.translate("MainWindow", "Ctrl+P", None, QtGui.QApplication.UnicodeUTF8))
 

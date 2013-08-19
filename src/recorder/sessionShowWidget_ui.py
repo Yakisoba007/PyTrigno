@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'sessionShowWidget.ui'
 #
-# Created: Tue Aug 13 11:04:43 2013
+# Created: Mon Aug 19 15:00:38 2013
 #      by: pyside-uic 0.2.14 running on PySide 1.1.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -12,7 +12,7 @@ from PySide import QtCore, QtGui
 class Ui_Form(object):
     def setupUi(self, Form):
         Form.setObjectName("Form")
-        Form.resize(285, 254)
+        Form.resize(759, 837)
         self.gridLayout = QtGui.QGridLayout(Form)
         self.gridLayout.setObjectName("gridLayout")
         self.formLayout = QtGui.QFormLayout()
@@ -32,6 +32,7 @@ class Ui_Form(object):
         self.label_3.setObjectName("label_3")
         self.formLayout.setWidget(1, QtGui.QFormLayout.LabelRole, self.label_3)
         self.showBemerkung = QtGui.QTextBrowser(Form)
+        self.showBemerkung.setReadOnly(False)
         self.showBemerkung.setObjectName("showBemerkung")
         self.formLayout.setWidget(1, QtGui.QFormLayout.FieldRole, self.showBemerkung)
         self.label_5 = QtGui.QLabel(Form)
