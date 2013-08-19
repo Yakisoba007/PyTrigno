@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'MainWindow.ui'
 #
-# Created: Mon Aug 19 15:17:44 2013
+# Created: Mon Aug 19 16:27:10 2013
 #      by: pyside-uic 0.2.14 running on PySide 1.1.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -79,6 +79,10 @@ class Ui_MainWindow(object):
         self.actionSave.setObjectName("actionSave")
         self.actionServer = QtGui.QAction(MainWindow)
         self.actionServer.setObjectName("actionServer")
+        self.actionOpen_Plotter = QtGui.QAction(MainWindow)
+        self.actionOpen_Plotter.setObjectName("actionOpen_Plotter")
+        self.menuNew.addAction(self.actionOpen_Plotter)
+        self.menuNew.addSeparator()
         self.menuNew.addAction(self.actionNew)
         self.menuNew.addAction(self.actionSave)
         self.menuNew.addSeparator()
@@ -92,6 +96,7 @@ class Ui_MainWindow(object):
         QtCore.QObject.connect(self.tbTrigger, QtCore.SIGNAL("clicked()"), MainWindow.trigger)
         QtCore.QObject.connect(self.actionServer, QtCore.SIGNAL("activated()"), MainWindow.setServer)
         QtCore.QObject.connect(self.actionSave, QtCore.SIGNAL("activated()"), MainWindow.save)
+        QtCore.QObject.connect(self.actionOpen_Plotter, QtCore.SIGNAL("activated()"), MainWindow.openPlotter)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):
@@ -110,4 +115,6 @@ class Ui_MainWindow(object):
         self.actionSave.setShortcut(QtGui.QApplication.translate("MainWindow", "Ctrl+S", None, QtGui.QApplication.UnicodeUTF8))
         self.actionServer.setText(QtGui.QApplication.translate("MainWindow", "Server", None, QtGui.QApplication.UnicodeUTF8))
         self.actionServer.setShortcut(QtGui.QApplication.translate("MainWindow", "Ctrl+O", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionOpen_Plotter.setText(QtGui.QApplication.translate("MainWindow", "Open Plotter", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionOpen_Plotter.setShortcut(QtGui.QApplication.translate("MainWindow", "Ctrl+P", None, QtGui.QApplication.UnicodeUTF8))
 

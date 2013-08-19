@@ -114,7 +114,7 @@ class Recorder(QMainWindow):
             self.showRunMeta.ui.leCurrentRun.setText(str(len(self.session.runs)))
             
             self.showSessionMeta.ui.showBemerkung.textChanged.connect(self.pendingSave)
-            self.showRunMeta.ui.lwRuns.itemDoubleClicked.connect(self.openItem)
+            self.showRunMeta.ui.lwRuns.itemDoubleClicked.connect(self.openPlotter)
             
             self.dockLayout.addWidget(self.showSessionMeta)
             self.dockLayout.addWidget(self.showRunMeta)
@@ -196,10 +196,11 @@ class Recorder(QMainWindow):
             else:
                 self.plots[p].plot(self.server.buffer[0][p,-5000:], clear=True)
     
-    def openItem(self, item):
+    def openPlotter(self, item=None):
         if self.plotter is None:
             self.plotter = Plotter()
-        self.plotter.load([os.path.join(self.session.dir, item.text()) + ".pk"])
+        if item is not None:
+            self.plotter.load([os.path.join(self.session.dir, item.text()) + ".pk"])
         self.plotter.show()
         
     def closeEvent(self, event):
