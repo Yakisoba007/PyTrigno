@@ -68,6 +68,7 @@ class DelsysStation(QObject):
         self.sdk.send("QUIT\r\n\r\n")
         self.emg.close()
         self.sdk.close()
+        self.acc.close()
     
     def flush(self):
         self.buffer = [np.zeros((16,0)), np.zeros((48,0))]

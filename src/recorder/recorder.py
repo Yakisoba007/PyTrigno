@@ -183,7 +183,7 @@ class Recorder(QMainWindow):
         
     def trigger(self):
         print("trigger")
-        trigger = self.server.buffer.shape[1]
+        trigger = self.server.buffer[0].shape[1]
         self.session.addTrigger(trigger)
         
     def ping(self):
