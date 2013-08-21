@@ -197,7 +197,7 @@ class Plotter(QMainWindow):
     def loadData(self):
         fileNames, ok1= QFileDialog.getOpenFileNames(
                      self, self.tr("Open data"),
-                     plattform.fixpath("D:\\Master\\emg\\electrodes\\prepare"), self.tr("Pickle Files (*.pk)"))
+                     plattform.fixpath("C:\\PatientData"), self.tr("Pickle Files (*.pk)"))
         if ok1:
             self.load(fileNames)
     

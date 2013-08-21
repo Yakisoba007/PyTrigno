@@ -19,9 +19,8 @@ import pyqtgraph as pg
 import numpy as np
 import socket
 import os
+from kinectRecorder import KinectRecorder
 from plotter.plotter import Plotter
-#import openni as oni
-
 
 class Recorder(QMainWindow):
     def __init__(self, parent=None):
@@ -48,6 +47,8 @@ class Recorder(QMainWindow):
         self.runPinger.setSingleShot(True)
         self.runPinger.timeout.connect(self.stop)
         self.pinger.timeout.connect(self.ping)
+        self.kinectRecorder=None
+        self.newpath=None
         self.notSavedState = False
         
     def clearDock(self):
@@ -67,6 +68,7 @@ class Recorder(QMainWindow):
             self.showRunMeta.deleteLater()
             self.showSessionMeta = None
             self.showRunMeta = None
+            self.kinectRecorder.killRecorder()
             
     def preparePlots(self):
         if self.ui.frame.layout() is None:
@@ -112,10 +114,9 @@ class Recorder(QMainWindow):
             self.showSessionMeta = sessionView(self.session, self)
             self.showRunMeta = RunWidget(self)
             self.showRunMeta.ui.leCurrentRun.setText(str(len(self.session.runs)))
-            
+            self.kinectRecorder=KinectRecorder()            
             self.showSessionMeta.ui.showBemerkung.textChanged.connect(self.pendingSave)
             self.showRunMeta.ui.lwRuns.itemDoubleClicked.connect(self.openPlotter)
-            
             self.dockLayout.addWidget(self.showSessionMeta)
             self.dockLayout.addWidget(self.showRunMeta)
             self.showRunMeta.show()
@@ -161,6 +162,8 @@ class Recorder(QMainWindow):
             
             name = self.showRunMeta.ui.leCurrentRun.text()
             self.session.addRun(name)
+            self.kinectRecorder.startRecording(self.newpath+'\\'+name+'.oni')            
+            self.ui.elapsedTime.setRange(0,d)
     
     def stop(self):
         self.ui.tbStop.setEnabled(False)
@@ -179,6 +182,8 @@ class Recorder(QMainWindow):
         self.pinger.stop()
         
         self.session.stopRun(self.server.buffer)
+        self.server.buffer = None
+        self.kinectRecorder.stopRecording()
         self.server.flush()
         
     def trigger(self):

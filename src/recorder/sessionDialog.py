@@ -24,5 +24,5 @@ class SessionDialog(QDialog):
     
     def changeDir(self):
         d = QFileDialog.getExistingDirectory(self, "Open Directory",
-                                             os.getcwd(), QFileDialog.ShowDirsOnly)
+                                             'C:\\PatientData', QFileDialog.ShowDirsOnly)
         self.ui.leDir.setText(d)
