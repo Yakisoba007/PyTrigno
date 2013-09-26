@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'mainWindow.ui'
 #
-# Created: Mon Aug 12 15:24:37 2013
+# Created: Thu Aug 22 16:54:54 2013
 #      by: pyside-uic 0.2.14 running on PySide 1.1.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -23,16 +23,30 @@ class Ui_MainWindow(object):
         self.tabWidget.setObjectName("tabWidget")
         self.tab = QtGui.QWidget()
         self.tab.setObjectName("tab")
-        self.gridLayout = QtGui.QGridLayout(self.tab)
-        self.gridLayout.setObjectName("gridLayout")
+        self.verticalLayout_2 = QtGui.QVBoxLayout(self.tab)
+        self.verticalLayout_2.setObjectName("verticalLayout_2")
         self.horizontalLayout = QtGui.QHBoxLayout()
         self.horizontalLayout.setObjectName("horizontalLayout")
         self.mainFrame = QtGui.QFrame(self.tab)
+        self.mainFrame.setMaximumSize(QtCore.QSize(32768, 32768))
         self.mainFrame.setFrameShape(QtGui.QFrame.StyledPanel)
         self.mainFrame.setFrameShadow(QtGui.QFrame.Raised)
         self.mainFrame.setObjectName("mainFrame")
         self.horizontalLayout.addWidget(self.mainFrame)
-        self.gridLayout.addLayout(self.horizontalLayout, 0, 0, 1, 1)
+        self.verticalLayout_2.addLayout(self.horizontalLayout)
+        self.offsetSlider = QtGui.QSlider(self.tab)
+        self.offsetSlider.setEnabled(False)
+        self.offsetSlider.setMinimum(0)
+        self.offsetSlider.setMaximum(300)
+        self.offsetSlider.setProperty("value", 150)
+        self.offsetSlider.setTracking(True)
+        self.offsetSlider.setOrientation(QtCore.Qt.Horizontal)
+        self.offsetSlider.setInvertedAppearance(False)
+        self.offsetSlider.setInvertedControls(False)
+        self.offsetSlider.setTickPosition(QtGui.QSlider.TicksBelow)
+        self.offsetSlider.setTickInterval(5)
+        self.offsetSlider.setObjectName("offsetSlider")
+        self.verticalLayout_2.addWidget(self.offsetSlider)
         self.tabWidget.addTab(self.tab, "")
         self.tab_2 = QtGui.QWidget()
         self.tab_2.setObjectName("tab_2")
@@ -69,9 +83,10 @@ class Ui_MainWindow(object):
         self.menubar.addAction(self.menuDatei.menuAction())
 
         self.retranslateUi(MainWindow)
-        self.tabWidget.setCurrentIndex(1)
+        self.tabWidget.setCurrentIndex(0)
         QtCore.QObject.connect(self.actionLoad, QtCore.SIGNAL("activated()"), MainWindow.loadData)
         QtCore.QObject.connect(self.dataView, QtCore.SIGNAL("itemSelectionChanged()"), MainWindow.plotData)
+        QtCore.QObject.connect(self.offsetSlider, QtCore.SIGNAL("valueChanged(int)"), MainWindow.correctOffset)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):

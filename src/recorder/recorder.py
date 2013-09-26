@@ -114,7 +114,11 @@ class Recorder(QMainWindow):
             self.showSessionMeta = sessionView(self.session, self)
             self.showRunMeta = RunWidget(self)
             self.showRunMeta.ui.leCurrentRun.setText(str(len(self.session.runs)))
-            self.kinectRecorder=KinectRecorder()            
+            try:
+                self.kinectRecorder=KinectRecorder()
+            except:
+                print "no Kinect recording"
+                self.kinectRecorder = None                        
             self.showSessionMeta.ui.showBemerkung.textChanged.connect(self.pendingSave)
             self.showRunMeta.ui.lwRuns.itemDoubleClicked.connect(self.openPlotter)
             self.dockLayout.addWidget(self.showSessionMeta)
@@ -162,7 +166,8 @@ class Recorder(QMainWindow):
             
             name = self.showRunMeta.ui.leCurrentRun.text()
             self.session.addRun(name)
-            self.kinectRecorder.startRecording(self.newpath+'\\'+name+'.oni')            
+            if self.kinectRecorder is not None:
+                self.kinectRecorder.startRecording(self.newpath+'\\'+name+'.oni')            
             self.ui.elapsedTime.setRange(0,d)
     
     def stop(self):
@@ -183,7 +188,8 @@ class Recorder(QMainWindow):
         
         self.session.stopRun(self.server.buffer)
         self.server.buffer = None
-        self.kinectRecorder.stopRecording()
+        if self.kinectRecorder is not None:
+            self.kinectRecorder.stopRecording()
         self.server.flush()
         
     def trigger(self):
