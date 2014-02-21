@@ -1,14 +1,13 @@
-'''
-Created on 13.08.2013
-
-@author: Genji
-'''
-from PySide.QtCore import *
-from PySide.QtGui import *
+from PySide.QtGui import QDialog, QFileDialog
 from sessionDialog_ui import Ui_Dialog
 import os
 
 class SessionDialog(QDialog):
+    '''
+    dialog box for creating a new session
+    '''
+    
+    
     def __init__(self, parent=None):
         super(SessionDialog, self).__init__(parent)
         self.ui = Ui_Dialog()

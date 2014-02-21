@@ -1,21 +1,15 @@
-'''
-Created on 19.08.2013
-
-@author: Rachel Hornung
-'''
-
 import primesense.openni2 as oni
 
 class KinectRecorder(object):
     '''
-    classdocs
+    class to control kinect recording, using openni2 and primesense driver
+    
+    record depth and rgb stream
+    for future use: adjust to only record skeleton
     '''
 
 
     def __init__(self):
-        '''
-        Constructor
-        '''
         oni.initialize()
         self.dev=oni.Device.open_any()
         self.depth_stream = self.dev.create_depth_stream()

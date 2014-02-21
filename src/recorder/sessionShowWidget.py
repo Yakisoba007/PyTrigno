@@ -1,15 +1,12 @@
-'''
-Created on 13.08.2013
-
-@author: Genji
-'''
-import sys
-import os
-from PySide.QtCore import *
-from PySide.QtGui import *
+from PySide.QtGui import QWidget
 from sessionShowWidget_ui import Ui_Form
 
 class sessionView(QWidget):
+    '''
+    widget to show session information
+    '''
+    
+    
     def __init__(self, session, parent=None):
         super(sessionView, self).__init__(parent)
         self.ui = Ui_Form()

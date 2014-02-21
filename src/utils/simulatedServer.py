@@ -1,7 +1,9 @@
 '''
-Created on 14.08.2013
+simulate serve if delsys station is not available
+sends random values (white noise)
 
-@author: Genji
+run in extra process and connect to it by using
+localhost
 '''
 
 import socket

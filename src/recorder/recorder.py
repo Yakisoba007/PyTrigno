@@ -1,11 +1,8 @@
-'''
-Created on 13.08.2013
-
-@author: Genji
-'''
 import sys
-from PySide.QtCore import *
-from PySide.QtGui import *
+from PySide.QtCore import QTimer
+from PySide.QtGui import (QMainWindow, QWidget, QGridLayout,
+                          QMessageBox, QInputDialog, QListWidgetItem,
+                          QApplication)
 from mainWindow import Ui_MainWindow
 from sessionDialog import SessionDialog
 from session import Session
@@ -23,6 +20,14 @@ from kinectRecorder import KinectRecorder
 from plotter.plotter import Plotter
 
 class Recorder(QMainWindow):
+    '''Main Window
+     - menu toolbar to load and save session, open plotter and set server
+     - dock widget holding session and run information
+     - grid plot to stream current emg data of 16 channels
+     - start, stop, progressbar and trigger for current run
+    '''
+    
+    
     def __init__(self, parent=None):
         super(Recorder, self).__init__(parent)
         self.ui = Ui_MainWindow()
@@ -41,8 +46,8 @@ class Recorder(QMainWindow):
         self.plots = []
         self.startTime = datetime.now()
         
-        self.pinger = QTimer(self)
-        self.runPinger = QTimer(self)
+        self.pinger = QTimer(self) # timer to read data from server whenever available
+        self.runPinger = QTimer(self) # timer to call stop when run duration times out
         
         self.runPinger.setSingleShot(True)
         self.runPinger.timeout.connect(self.stop)
@@ -52,6 +57,14 @@ class Recorder(QMainWindow):
         self.notSavedState = False
         
     def clearDock(self):
+        ''' clear session (dock widget elements)
+        - remove showSessionMeta
+        - remove showRunMeta
+        - kill kinectRecorder
+        - remove session
+        
+        if changes are not saved, ask
+        '''
         if self.showSessionMeta is not None:
             reply = QMessageBox.question(self, 'QMessageBox.question()',
                                          'Do you want to first save the current session?',
@@ -71,10 +84,16 @@ class Recorder(QMainWindow):
             self.kinectRecorder.killRecorder()
             
     def preparePlots(self):
+        '''arange 2x8 plots for each channel and
+        set parameters
+        '''
         if self.ui.frame.layout() is None:
             layout = QGridLayout()
             self.ui.frame.setLayout(layout)
         else:
+            #########
+            # reset #
+            #########
             layout = self.ui.frame.layout()
             layout.removeWidget(self.plotWidget)
             self.plotWidget = None
@@ -92,13 +111,22 @@ class Recorder(QMainWindow):
         self.plotWidget.show()
         
     def setServer(self):
+        ''' open dialog to set server address
+        e.g. localhost, 192.168.1.5
+        '''
         text, ok = QInputDialog.getText(self, "Set server",
                 'Enter server adress')
         if ok:
             self.server.host = text
             
     def newSession(self):
+        ''' create new session:
+        - clear dock
+        - open dialog to set session parameters
+        - create showSessionMeta, showRunMeta, kinectRecorder
+        '''
         self.clearDock()
+        
         sessionDialog = SessionDialog(self)
         if sessionDialog.exec_():
             newpath = os.path.join(sessionDialog.ui.leDir.text(), sessionDialog.ui.leName.text()) 
@@ -108,21 +136,25 @@ class Recorder(QMainWindow):
                 print('reusing folder')
                 QMessageBox.information(self, 'Warning!', '''You\'re reusing the subject folder''',
             QMessageBox.Ok)
+                
             self.session = Session(sessionDialog.ui.leName.text(),
                                    sessionDialog.ui.teBemerkung.toPlainText(),
                                    newpath)
             self.showSessionMeta = sessionView(self.session, self)
             self.showRunMeta = RunWidget(self)
             self.showRunMeta.ui.leCurrentRun.setText(str(len(self.session.runs)))
+            
             try:
                 self.kinectRecorder=KinectRecorder()
             except:
                 print "no Kinect recording"
-                self.kinectRecorder = None                        
+                self.kinectRecorder = None
+                                        
             self.showSessionMeta.ui.showBemerkung.textChanged.connect(self.pendingSave)
             self.showRunMeta.ui.lwRuns.itemDoubleClicked.connect(self.openPlotter)
             self.dockLayout.addWidget(self.showSessionMeta)
             self.dockLayout.addWidget(self.showRunMeta)
+            
             self.showRunMeta.show()
             self.showSessionMeta.show()
             self.preparePlots()
@@ -139,6 +171,14 @@ class Recorder(QMainWindow):
         self.session.dump("ReadMe.txt")
         
     def startRun(self):
+        ''' start a recording:
+         - setup server
+         - setup timer (if no eternity is toggled)
+         - setup progress bar
+         - setup buttons
+         - setup session
+         - start recorder
+        '''
         #setup server
         self.server.exitFlag = False
         try:
@@ -171,6 +211,13 @@ class Recorder(QMainWindow):
             self.ui.elapsedTime.setRange(0,d)
     
     def stop(self):
+        ''' stop recording due to button press or timeout
+        - setup buttons
+        - stop timers
+        - stop server
+        - kill kinectRecorder
+        - add item to list of runs
+        '''
         self.ui.tbStop.setEnabled(False)
         self.ui.tbTrigger.setEnabled(False)
         self.ui.tbStart.setEnabled(True)
@@ -193,11 +240,15 @@ class Recorder(QMainWindow):
         self.server.flush()
         
     def trigger(self):
+        ''' add a trigger '''
         print("trigger")
         trigger = self.server.buffer[0].shape[1]
         self.session.addTrigger(trigger)
         
     def ping(self):
+        ''' update progress bar and plots everytime
+        new data is available 
+        '''
         elapsed = int((datetime.now()-self.startTime).total_seconds())
         self.ui.elapsedTime.setValue(elapsed)
         
@@ -215,7 +266,6 @@ class Recorder(QMainWindow):
         self.plotter.show()
         
     def closeEvent(self, event):
-        # do stuff
         if self.notSavedState:
             reply = QMessageBox.question(self, 'QMessageBox.question()',
                                             'Do you want to first save the current session?',

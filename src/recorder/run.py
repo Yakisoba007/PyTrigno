@@ -1,8 +1,3 @@
-'''
-Created on 13.08.2013
-
-@author: Genji
-'''
 try: 
     import cPickle as pickle
 except ImportError:
@@ -10,15 +5,12 @@ except ImportError:
     
 class Run(object):
     '''
-    classdocs
+    container class to hold recorded data and triggers
+    dump them when recording is stopped
     '''
 
 
     def __init__(self, filename):
-        '''
-        Constructor
-        '''
-        
         self.filename = filename + ".pk"
         self.data = None
         self.triggers = []

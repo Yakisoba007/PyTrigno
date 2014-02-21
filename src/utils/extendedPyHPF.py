@@ -7,23 +7,23 @@ import sys
 import pyHPF
 sys.modules['pyHPF'] = pyHPF
 
-#import primesense.openni2 as oni
 import primesense.openni2 as oni
-
 import numpy as np
-import thread
-import ctypes
 
 class extendedPyHPF(pyHPF.pyHPF):
     '''
     data wrapper for multiple input format
+    read tuple of layout
+        data[4]: emg[n,e],x[n],y[n],z[n]
+        triggers[t]
+        oni (optional)
+    
+    playback control for oni-videos (buffers already loaded
+    frames to reduce latency)
     '''
 
 
     def __init__(self, data):
-        '''
-        Constructor
-        '''
         l = data[0][0].shape
         self.data = [None]*l[0]*4
         self.name = []
@@ -50,6 +50,11 @@ class extendedPyHPF(pyHPF.pyHPF):
             self.player = oni.PlaybackSupport(self.dev)
             
     def seekFrame(self, idx):
+        ''' get frame at index idx
+        frame is loaded and put into dictionary to speed up loading
+        
+        return frame as numpy array
+        '''
         if idx == -1:
             self.frames = {}
         
@@ -63,21 +68,8 @@ class extendedPyHPF(pyHPF.pyHPF):
             self.player.seek(self.depth_stream,idx)
             frame = self.clr_stream.read_frame()
             frame = np.ctypeslib.as_array(frame.get_buffer_as_triplet())
-            #np.asarray(list(frame.get_buffer_as_triplet()))
             frame = frame.reshape((480,640,3))
             frame = np.mean(frame, axis=2)
             self.frames[idx] = np.flipud(frame).transpose()
             
-#            frame = self.depth_stream.read_frame()
-#            frame = np.asarray(list(frame.get_buffer_as_uint16()))
-#            self.frames[idx] = frame.reshape((480,640)).transpose()
         return self.frames[idx]
-#        for i in range(max):
-#            frame = self.depth_stream.read_frame()
-#            frame = np.asarray(list(frame.get_buffer_as_uint16()))
-#            self.frames[i] = frame.reshape((480,640))
-#        print self.frames
-#        print self.frames.shape
-#        self.depth_stream.stop()
-#        self.clr_stream.stop()
-#        oni.unload()

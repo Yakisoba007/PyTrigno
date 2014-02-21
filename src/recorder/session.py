@@ -1,14 +1,11 @@
-'''
-Created on 13.08.2013
-
-@author: Genji
-'''
 from run import Run
 import os
 
 class Session(object):
     '''
-    classdocs
+    container class holding information about session:
+    
+    - name, remarks, directory, list of runs
     '''
 
 
